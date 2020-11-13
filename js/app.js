@@ -20,13 +20,13 @@ new Vue({
                     <div class="input-group mb-3">
                         <input v-model="inputSearch" type="text" class="form-control" placeholder="Nome da pessoa" aria-label="Recipient's username" aria-describedby="button-addon2">
                         <div class="input-group-append">
-                            <button v-on:click="findUser"class="btn btn-outline-secondary" type="button" id="button-addon2">Buscar</button>
+                            <button v-on:click="clearInputSearch"class="btn btn-outline-secondary" type="button" id="button-addon2">Limpar</button>
                         </div>
                     </div>        
                 </div>
 
                 <div class="col-sm">
-                    <button v-on:click="resetError" type="button" class="btn btn-primary" data-toggle="modal" data-target="#newUser">
+                    <button v-on:click="resetError, updateModal('Novo usuário', -1)" type="button" class="btn btn-primary" data-toggle="modal" data-target="#newUser">
                         Novo usuário
                     </button>
                     <button v-on:click="filterUser" type="button" class="btn btn-primary">
@@ -37,12 +37,12 @@ new Vue({
 
             <div class="row d-flex justify-content-center">
 
-                <div class="card mr-3 mt-3" style="width: 18rem;" v-for="(user, index) in users">
+                <div class="card mr-3 mt-3" style="width: 18rem;" v-for="(user, index) in users" v-if="user.visible">
                     <div class="card-body">
                         <h5 class="card-title">{{user.name}}</h5>
                         <h6 class="card-subtitle mb-2 text-muted">E-mail: {{user.email}}</h6>
                         <h6 class="card-subtitle mb-2 text-muted">Telefone: {{user.phone}}</h6>
-                        <a href="#" class="card-link">Alterar</a>
+                        <a v-on:click="updateModal('Alterar Usuário', index)" href="#" data-toggle="modal" data-target="#newUser" class="card-link">Alterar</a>
                         <a v-on:click.prevent="removeUser(index)" href="#" class="card-link">Excluir</a>
                     </div>
                 </div> 
@@ -55,7 +55,7 @@ new Vue({
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Novo usuário</h5>                        
+                        <h5 class="modal-title" id="exampleModalLabel">{{modalTitle}}</h5>                        
                     </div>
 
                     <div class="modal-body">
@@ -88,7 +88,8 @@ new Vue({
 
                     <div class="modal-footer">
                         <button v-on:click= "clearInputs" type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                        <button v-on:click="addUser" type="button" class="btn btn-primary">Salvar</button>
+                        <button v-on:click="addUser" v-if="salvarButton" type="button" class="btn btn-primary" >Salvar</button>
+                        <button v-on:click="updateUser"  v-if="updateButton" type="button" class="btn btn-primary">Alterar</button>
                     </div>
                 </div>
             </div>
@@ -108,7 +109,8 @@ new Vue({
                     this.users.push({
                         name: element.name,
                         email: element.email,
-                        phone: element.phone
+                        phone: element.phone,
+                        visible: true
                     })
                 });
             }).catch(error =>{
@@ -118,6 +120,15 @@ new Vue({
             email:'',
             phone:'',
             inputSearch:'',
+            modalTitle:'',
+            salvarButton:'',
+            updateButton:'',
+            updateIndex:'',
+        }
+    },
+    watch:{
+        inputSearch: function(){
+            this.findUser();
         }
     },
     methods:{
@@ -130,7 +141,8 @@ new Vue({
                 this.users.push({
                     name: this.name,
                     email: this.email,
-                    phone: this.phone
+                    phone: this.phone,
+                    visible: true
                 });
 
                 this.clearInputs();
@@ -148,6 +160,7 @@ new Vue({
             this.name = '';
             this.email = '';
             this.phone = '';
+            this.updateIndex = '';
             this.resetError();
         },
         filterUser(){
@@ -160,15 +173,60 @@ new Vue({
             $("#error").hide();
         },
         findUser(){
-            if(this.inputSearch.trim()  != ''){
+            if(this.inputSearch.trim()  != '' || this.inputSearch == ''){
                 this.users.forEach(user =>{
                     if(user.name.toLowerCase().indexOf(this.inputSearch.toLowerCase()) != -1){
-                        console.log(user.name);
+                        user.visible = true;
+                    }else{
+                        user.visible = false;
                     }
                 })
                
+            }else{
+                this.user.forEach(user=>{
+                    user.visible = true;
+                })
             }
             
+        },
+        updateModal(title, indice){
+            this.modalTitle = title;
+            if(indice != -1){
+                this.updateButton = true;
+                this.salvarButton = false;
+                let user = this.users[indice];
+                this.name = user.name;
+                this.email = user.email;
+                this.phone = user.phone;
+                this.updateIndex = indice;
+            }else{
+                this.updateButton = false;
+                this.salvarButton = true;
+            }
+        },
+        updateUser(){
+
+            if((this.name.trim() || this.email.trim() || this.phone.trim()) == ''){
+                $("#error").show();
+            } else {
+                // Add to user list
+                let userUpdate = this.users[this.updateIndex];
+                userUpdate.name = this.name;
+                userUpdate.email = this.email;
+                userUpdatephone = this.phone; 
+
+                this.clearInputs();
+
+                // Hide Modal
+                $('#newUser').modal('hide');
+            }
+           
+        },
+        clearInputSearch(){
+            this.inputSearch = '';
+            this.users.forEach(user=>{
+                user.visible = true;
+            })
         }
 
     }
