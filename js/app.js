@@ -4,14 +4,14 @@ new Vue({
     <div class="container-fluid">
             
         <nav class="navbar navbar-light bg-light">
-            <a class="navbar-brand" href="#">
+            <a class="navbar-brand" href="index.html">
                 <img src="img/banner.png" width="50" height="50" alt="">    
                 Skylar Note
             </a>
         </nav>
 
         <div class="container mt-5">
-            <div class="row">
+            <div class="row justify-content-center">
 
                 <div class="col-sm">
                 </div>
@@ -28,11 +28,13 @@ new Vue({
                 <div class="col-sm">
                     <button v-on:click="resetError, updateModal('Novo usuário', -1)" type="button" class="btn btn-primary" data-toggle="modal" data-target="#newUser">
                         Novo usuário
-                    </button>
-                    <button v-on:click="filterUser" type="button" class="btn btn-primary">
-                        Ordenar por nome
-                    </button>
+                    </button>                    
                 </div>
+            </div>
+            <div class="row mt-5 d-flex justify-content-center">
+                <button v-on:click="filterUser" type="button" class="btn btn-primary btn-sm">
+                    Ordenar por nome
+                </button>
             </div>
 
             <div class="row d-flex justify-content-center">
@@ -132,12 +134,11 @@ new Vue({
         }
     },
     methods:{
+        // Add new user
         addUser(){
-            // Validate input
-            if((this.name.trim() || this.email.trim() || this.phone.trim()) == ''){
-                $("#error").show();
+            if(this.name.trim() == '' || this.email.trim()=='' || this.phone.trim() == ''){
+                $("#error").show(); // Show error div
             } else {
-                // Add to user list
                 this.users.push({
                     name: this.name,
                     email: this.email,
@@ -151,27 +152,30 @@ new Vue({
                 $('#newUser').modal('hide');
             }
         },
+        // Remove user by index
         removeUser(index){
-            // Remove user by index
             this.users.splice(index, 1);
         },
+        // Clear all inputs
         clearInputs(){
-            // Clear all inputs
+            
             this.name = '';
             this.email = '';
             this.phone = '';
             this.updateIndex = '';
             this.resetError();
         },
+        // Sort users by name
         filterUser(){
-            // Sort users by name
             this.users.sort((a, b)=>{
                 return (a.name > b.name) ? 1: ((b.name > a.name) ? -1:0);
             })
         },
+        // Hide div error
         resetError(){
             $("#error").hide();
         },
+        // Find and show user search
         findUser(){
             if(this.inputSearch.trim()  != '' || this.inputSearch == ''){
                 this.users.forEach(user =>{
@@ -189,6 +193,7 @@ new Vue({
             }
             
         },
+        // Update modal to save or update user 
         updateModal(title, indice){
             this.modalTitle = title;
             if(indice != -1){
@@ -204,16 +209,16 @@ new Vue({
                 this.salvarButton = true;
             }
         },
+        // Update a exist user
         updateUser(){
-
-            if((this.name.trim() || this.email.trim() || this.phone.trim()) == ''){
+            if(this.name.trim() == '' || this.email.trim()=='' || this.phone.trim() == ''){
                 $("#error").show();
             } else {
                 // Add to user list
                 let userUpdate = this.users[this.updateIndex];
                 userUpdate.name = this.name;
                 userUpdate.email = this.email;
-                userUpdatephone = this.phone; 
+                userUpdate.phone = this.phone; 
 
                 this.clearInputs();
 
