@@ -106,7 +106,6 @@ new Vue({
             // Get users and populate users list
             request: axios.get('https://jsonplaceholder.typicode.com/users', {})
             .then(response =>{
-                let list = []
                 response.data.forEach(element => {
                     this.users.push({
                         name: element.name,
